@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:english_words/english_words.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -9,12 +9,25 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: str , //应用名称
+      initialRoute: "/",
       theme: ThemeData(
        //蓝色主题
         primarySwatch: Colors.blue,
       ),
-      //Flutter应用的首页
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      //路由注册表(都是通过路由进行跳转的)
+      routes: {
+    //  "new_pager":(context)=>NewRout(),
+       "/": (context)=>MyHomePage(title:"Home Page")//注册首页路由
+      },
+      //Flutter应用的首页(原始方式)
+    //  home: MyHomePage(title: 'Flutter Demo Home Page'),
+      onGenerateRoute: (RouteSettings settings){
+          return MaterialPageRoute(builder: (context){
+            String route = settings.name;
+            print("onGenerateRoute+$route");
+          });
+      },
+
     );
   }
 }
@@ -80,6 +93,35 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.display1,
             ),
+            FlatButton(
+              child: Text("open new route 携带参数"),
+              textColor: Colors.blue,
+              onPressed: (){
+                //导航到新路由(Navigator是一个路由管理组件，它提供了打开和退出路由页方法)
+//                Navigator.push(context,
+//                    MaterialPageRoute(builder: (context){
+//                      return NewRout();
+//                    }));
+            Navigator.pushNamed(context, "");
+                  //方式二：通过注册的路由跳转
+//                  Navigator.pushNamed(context, "new_pager");
+                  //方式二：通过注册的路由跳转(并且传值);Navigator是一个路由管理组件，它提供了打开和退出路由页的方法
+                  //通常当前屏幕的页面就是栈顶的路由，Navigator提供一系列方法来管理路由栈
+            //      Navigator.of(context).pushNamed("new_pager",arguments:"来自上个页面");
+              },
+            ),
+            FlatButton(
+               child: Text("路由传值"),
+               textColor: Colors.blue,
+               onPressed: (){
+               //导航到新路由(Navigator是一个路由管理组件，它提供了打开和退出路由页方法)
+                  Navigator.push(context,
+                   MaterialPageRoute(builder: (context){
+                   return RouterTestRoute ();
+            }));
+      },
+    ),
+            RandomWordWidget(),
           ],
         ),
       ),
@@ -90,7 +132,6 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
-
   //分析
 /**
  *  1. 导入包 import 'package:flutter/material.dart'; 该行代码导入的是Material UI
@@ -104,55 +145,145 @@ class _MyHomePageState extends State<MyHomePage> {
  *      (通常是通过组合，拼装其它基础widget)
  *    - MateralApp 是Material库中提供的Flutter APP框架 ,也是一个widget ，包含应用的名称，主题首页路由等
  *    - Scaffold(skæfoʊld)是Material库中提供的页面脚手架，包含导航栏和Body，以及FloatingActionButton
- *
- *
- *
- *
- *
- *
- *
- *
  */
+}
 
 
+//第二节 路由管理
+class NewRout extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    var arsg = ModalRoute.of(context).settings.arguments ;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("New rout"),
+      ),
+      body: Center(
+        child: Text("This is new route arsgs= $arsg"),
+      ),
+    );
+  }
 
 }
+
+
+// 路由传值
+class TipRoute extends StatelessWidget{
+  TipRoute({
+    Key key,
+    @required this.text,  // 接收一个text参数
+  }) : super(key: key);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+//    var args = ModalRoute.of(context).settings.arguments; 这种好像是路由传值的获取数据方式
+//    print("tips args+$args");
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("提示"),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(18),
+        child: Center(
+          child: Column(
+            children: <Widget>[
+              Text(text),
+              RaisedButton(
+                onPressed: () => Navigator.pop(context, "返回666"),
+                child: Text("返回"),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+class RouterTestRoute extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("传值准备"),
+      ),
+      body:  Center(
+        child: RaisedButton(
+          onPressed: () async {
+            // 打开`TipRoute`，并等待返回结果
+            var result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return TipRoute(
+                    // 路由参数
+                    text: "我是来自上个接界面",
+                  );
+                },
+              ),
+            );
+            //输出`TipRoute`路由返回结果
+            print("路由返回值===: $result");
+          },
+          child: Text("打开提示页"),
+        ),
+      ),
+    );
+
+  }
+}
+
+
+//导入的包的使用
+class RandomWordWidget extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    final wordpair = new WordPair.random();
+
+    return Padding(
+      padding:const EdgeInsets.all(8.0),
+      child: new Text(wordpair.toString()),
+    );
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
